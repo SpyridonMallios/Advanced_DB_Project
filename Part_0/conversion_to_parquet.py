@@ -48,8 +48,8 @@ business_schema = T.StructType([
     T.StructField("stars", T.DoubleType(), nullable=True),
     T.StructField("review_count", T.IntegerType(), nullable=True),
     T.StructField("is_open", T.IntegerType(), nullable=True),
-    T.StructField("attributes", T.MapType(T.StringType(), T.StringType()), nullable=True),
-    T.StructField("hours", T.MapType(T.StringType(), T.StringType()), nullable=True)
+    T.StructField("attributes", T.StringType(), nullable=True),
+    T.StructField("hours", T.StringType(), nullable=True)
 ])
 
 
@@ -92,7 +92,9 @@ user_schema = T.StructType([
 
 
 # Change the JSON files to Parquet
-df_business = spark.read.schema(business_schema).json(YELP_BUSINESS_PATH)
+df_business = spark.read.schema(business_schema).json(YELP_BUSINESS_PATH) \
+    .withColumn("attributes", F.parse_json(F.col("attributes"))) \
+    .withColumn("hours", F.parse_json(F.col("hours")))
 df_business.write.mode("overwrite").parquet(OUT_YELP_BUSINESS_PATH)
 
 
